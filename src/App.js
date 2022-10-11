@@ -4,32 +4,27 @@ function App() {
   const [previousNumbers, setPreviousNumbers] = useState(null);
   const [currentNumbers, setCurrentNumbers] = useState("");
 
+  //helper
+  function handleAC(id) {
+    if (id === "AC") {
+      setCurrentNumbers("");
+      setPreviousNumbers("");
+    }
+  }
+
   function handleClick(e) {
     if (!currentNumbers) return;
-    if (isNaN(currentNumbers[currentNumbers.length - 1])) {
-      return;
-    }
     const { id } = e.target;
 
+    if (isTheLastAnOperand(currentNumbers)) {
+      setCurrentNumbers(slice(currentNumbers));
+    }
+
+    function handleOperand(op) {
+      if (op === "AC") handleAC(op);
+      else setCurrentNumbers((prev) => prev + `${op}`);
+    }
     switch (id) {
-      case "AC":
-        setCurrentNumbers("");
-        setPreviousNumbers("");
-        break;
-      case "+":
-        setCurrentNumbers((prev) => prev + "+");
-
-        break;
-      case "x":
-        setCurrentNumbers((prev) => prev + "*");
-        break;
-      case "/":
-        setCurrentNumbers((prev) => prev + "/");
-        break;
-      case "-":
-        setCurrentNumbers((prev) => prev + "-");
-
-        break;
       case ".":
         if (currentNumbers.includes(".")) return;
         setCurrentNumbers((prev) => prev + ".");
@@ -41,24 +36,33 @@ function App() {
         } else if (currentNumbers < 0) {
           setCurrentNumbers(Math.abs(currentNumbers));
         }
+        break;
+      default:
+        handleOperand(id);
     }
   }
 
+  //adding input to display
   function addNumber(e) {
     const { id } = e.target;
-
     setCurrentNumbers((prev) => prev + id);
   }
 
+  //helper to remove last slot if its an operand
+  function slice(str) {
+    return str.slice(0, currentNumbers.length - 1);
+  }
+  //helper to check if the last slot is an operand
+  function isTheLastAnOperand(currentDisplay) {
+    return isNaN(currentDisplay[currentDisplay.length - 1]);
+  }
+
   function handleEqual() {
-    if (isNaN(currentNumbers[currentNumbers.length - 1])) {
-      console.log(currentNumbers);
-      const trimNum = currentNumbers.slice(0, currentNumbers.length - 1);
-      console.log(trimNum);
-      setCurrentNumbers(() => eval(trimNum).toFixed(2));
-    } else {
-      setCurrentNumbers(() => eval(currentNumbers).toFixed(2));
-    }
+    if (isTheLastAnOperand(currentNumbers)) {
+      const updatedNumbers = currentNumbers;
+      setCurrentNumbers(slice(updatedNumbers));
+    } else setCurrentNumbers(() => eval(currentNumbers).toString());
+
     setPreviousNumbers(() => currentNumbers);
   }
   return (
@@ -70,7 +74,7 @@ function App() {
         >
           <div className="">
             <div className="text-[8px] flex justify-end">{previousNumbers}</div>
-            <div className="flex justify-end ">{currentNumbers}</div>
+            <div className="text-xl flex justify-end ">{currentNumbers}</div>
           </div>
         </div>
         <div
@@ -124,7 +128,7 @@ function App() {
         </div>
         <div
           onClick={handleClick}
-          id={"x"}
+          id={"*"}
           className="bg-orange-400 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           x
