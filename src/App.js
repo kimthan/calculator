@@ -1,9 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
-  const [previousNumbers, setPreviousNumbers] = useState(null);
+  const [previousNumbers, setPreviousNumbers] = useState("");
   const [currentNumbers, setCurrentNumbers] = useState("");
 
+  useEffect(() => {
+    function handleKey(e) {
+      addNumber(e.key);
+    }
+
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [currentNumbers]);
   //helper
   function handleAC(id) {
     if (id === "AC") {
@@ -12,12 +22,12 @@ function App() {
     }
   }
 
-  function handleClick(e) {
+  function handleOperandClick(e) {
     if (!currentNumbers) return;
     const { id } = e.target;
 
-    if (isTheLastAnOperand(currentNumbers)) {
-      setCurrentNumbers(slice(currentNumbers));
+    if (isLastOperand(currentNumbers)) {
+      setCurrentNumbers(trimOperand(currentNumbers));
     }
 
     function handleOperand(op) {
@@ -32,9 +42,9 @@ function App() {
         break;
       case "+/-":
         if (currentNumbers > 0) {
-          setCurrentNumbers(() => -currentNumbers);
+          setCurrentNumbers(() => eval(-currentNumbers));
         } else if (currentNumbers < 0) {
-          setCurrentNumbers(Math.abs(currentNumbers));
+          setCurrentNumbers(Math.abs(currentNumbers.slice(1)).toString());
         }
         break;
       default:
@@ -43,26 +53,25 @@ function App() {
   }
 
   //adding input to display
-  function addNumber(e) {
-    const { id } = e.target;
-    setCurrentNumbers((prev) => prev + id);
+  function addNumber(number) {
+    if (!isNaN(number)) {
+      setCurrentNumbers((prev) => prev + number);
+    }
   }
 
   //helper to remove last slot if its an operand
-  function slice(str) {
+  function trimOperand(str) {
     return str.slice(0, currentNumbers.length - 1);
   }
   //helper to check if the last slot is an operand
-  function isTheLastAnOperand(currentDisplay) {
+  function isLastOperand(currentDisplay) {
     return isNaN(currentDisplay[currentDisplay.length - 1]);
   }
 
   function handleEqual() {
-    if (isTheLastAnOperand(currentNumbers)) {
-      const updatedNumbers = currentNumbers;
-      setCurrentNumbers(slice(updatedNumbers));
+    if (isLastOperand(currentNumbers)) {
+      setCurrentNumbers(trimOperand(currentNumbers));
     } else setCurrentNumbers(() => eval(currentNumbers).toString());
-
     setPreviousNumbers(() => currentNumbers);
   }
   return (
@@ -78,7 +87,7 @@ function App() {
           </div>
         </div>
         <div
-          onClick={handleClick}
+          onClick={handleOperandClick}
           id={"AC"}
           className="bg-gray-500 w-[35px] h-[35px] cursor-pointer rounded-full mx-auto text-center flex items-center justify-center"
         >
@@ -86,27 +95,27 @@ function App() {
         </div>
         <div
           id={"+/-"}
-          onClick={handleClick}
+          onClick={handleOperandClick}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           +/-
         </div>
         <div
-          onClick={handleClick}
+          onClick={handleOperandClick}
           id={"%"}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           %
         </div>
         <div
-          onClick={handleClick}
+          onClick={handleOperandClick}
           id={"/"}
           className="bg-orange-400 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           /
         </div>
         <div
-          onClick={addNumber}
+          onClick={(e) => addNumber(e.target.id)}
           id={7}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
@@ -114,20 +123,20 @@ function App() {
         </div>
         <div
           id={8}
-          onClick={addNumber}
+          onClick={(e) => addNumber(e.target.id)}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           8
         </div>
         <div
           id={9}
-          onClick={addNumber}
+          onClick={(e) => addNumber(e.target.id)}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           9
         </div>
         <div
-          onClick={handleClick}
+          onClick={handleOperandClick}
           id={"*"}
           className="bg-orange-400 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
@@ -135,41 +144,41 @@ function App() {
         </div>
         <div
           id={4}
-          onClick={addNumber}
+          onClick={(e) => addNumber(e.target.id)}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           4
         </div>
         <div
           id={5}
-          onClick={addNumber}
+          onClick={(e) => addNumber(e.target.id)}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           5
         </div>
         <div
           id={6}
-          onClick={addNumber}
+          onClick={(e) => addNumber(e.target.id)}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           6
         </div>
         <div
-          onClick={handleClick}
+          onClick={handleOperandClick}
           id={"-"}
           className="bg-orange-400 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           -
         </div>
         <div
-          onClick={addNumber}
+          onClick={(e) => addNumber(e.target.id)}
           id={1}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           1
         </div>
         <div
-          onClick={addNumber}
+          onClick={(e) => addNumber(e.target.id)}
           id={2}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
@@ -177,28 +186,28 @@ function App() {
         </div>
         <div
           id={3}
-          onClick={addNumber}
+          onClick={(e) => addNumber(e.target.id)}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           3
         </div>
         <div
           id={"+"}
-          onClick={handleClick}
+          onClick={handleOperandClick}
           className="bg-orange-400 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           +
         </div>
         <div
           id={0}
-          onClick={addNumber}
+          onClick={(e) => addNumber(e.target.id)}
           className="bg-gray-500 w-[80px] h-[35px] col-span-2 rounded-full mx-auto text-center flex items-center justify-center"
         >
           0
         </div>
         <div
           id={"."}
-          onClick={handleClick}
+          onClick={handleOperandClick}
           className="bg-gray-500 w-[35px] h-[35px] rounded-full mx-auto text-center flex items-center justify-center"
         >
           .
